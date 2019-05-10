@@ -16,16 +16,23 @@ FILE_LICENCE ( GPL2_OR_LATER_OR_UBDL );
 #define TIMER_EFI
 #define UMALLOC_EFI
 #define SMBIOS_EFI
-#define SANBOOT_NULL
+#define SANBOOT_EFI
 #define BOFM_EFI
 #define ENTROPY_EFI
 #define TIME_EFI
 #define REBOOT_EFI
+#define ACPI_EFI
 
 #define DOWNLOAD_PROTO_FILE	/* Local filesystem access */
 
 #define	IMAGE_EFI		/* EFI image support */
 #define	IMAGE_SCRIPT		/* iPXE script image support */
+
+#define	SANBOOT_PROTO_ISCSI	/* iSCSI protocol */
+#define	SANBOOT_PROTO_AOE	/* AoE protocol */
+#define	SANBOOT_PROTO_IB_SRP	/* Infiniband SCSI RDMA protocol */
+#define	SANBOOT_PROTO_FCP	/* Fibre Channel protocol */
+#define	SANBOOT_PROTO_HTTP	/* HTTP SAN protocol */
 
 #define	USB_HCD_XHCI		/* xHCI USB host controller */
 #define	USB_HCD_EHCI		/* EHCI USB host controller */

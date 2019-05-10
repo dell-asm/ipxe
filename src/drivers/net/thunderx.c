@@ -1146,9 +1146,16 @@ static int txnic_lmac_probe ( struct txnic_lmac *lmac ) {
  * @v lmac		Logical MAC
  */
 static void txnic_lmac_remove ( struct txnic_lmac *lmac ) {
+	uint64_t config;
 
 	/* Sanity check */
 	assert ( lmac->vnic != NULL );
+
+	/* Disable packet receive and transmit */
+	config = readq ( lmac->regs + BGX_CMR_CONFIG );
+	config &= ~( BGX_CMR_CONFIG_DATA_PKT_TX_EN |
+		     BGX_CMR_CONFIG_DATA_PKT_RX_EN );
+	writeq ( config, ( lmac->regs + BGX_CMR_CONFIG ) );
 
 	/* Unregister network device */
 	unregister_netdev ( lmac->vnic->netdev );
@@ -1338,9 +1345,6 @@ static void txnic_pf_remove ( struct pci_device *pci ) {
 	/* Remove from list of physical functions */
 	list_del ( &pf->list );
 
-	/* Disable physical function */
-	writeq ( 0, ( pf->regs + TXNIC_PF_CFG ) );
-
 	/* Unmap registers */
 	iounmap ( pf->regs );
 
@@ -1490,18 +1494,24 @@ static void txnic_bgx_init ( struct txnic_bgx *bgx, unsigned int type ) {
  */
 static void txnic_bgx_mac ( struct txnic_lmac *lmac ) {
 	struct txnic_bgx *bgx = lmac->bgx;
-	BOARD_CFG *boardcfg;
-	NODE_CFG *nodecfg;
-	BGX_CFG *bgxcfg;
-	LMAC_CFG *lmaccfg;
+	unsigned int lmac_idx = TXNIC_LMAC_IDX ( lmac->idx );
+	uint64_t mac;
+	EFI_STATUS efirc;
+	int rc;
 
 	/* Extract MAC from Board Configuration protocol, if available */
 	if ( txcfg ) {
-		boardcfg = txcfg->BoardConfig;
-		nodecfg = &boardcfg->Node[ bgx->node % MAX_NODES ];
-		bgxcfg = &nodecfg->BgxCfg[ bgx->idx % BGX_PER_NODE_COUNT ];
-		lmaccfg = &bgxcfg->Lmacs[ lmac->idx % LMAC_PER_BGX_COUNT ];
-		lmac->mac.be64 = cpu_to_be64 ( lmaccfg->MacAddress );
+		if ( ( efirc = txcfg->GetLmacProp ( txcfg, bgx->node, bgx->idx,
+						    lmac_idx, MAC_ADDRESS,
+						    sizeof ( mac ),
+						    &mac ) ) == 0 ) {
+			lmac->mac.be64 = cpu_to_be64 ( mac );
+		} else {
+			rc = -EEFI ( efirc );
+			DBGC ( TXNICCOL ( bgx ), "TXNIC %d/%d/%d could not get "
+			       "MAC address: %s\n", bgx->node, bgx->idx,
+			       lmac->idx, strerror ( rc ) );
+		}
 	} else {
 		DBGC ( TXNICCOL ( bgx ), "TXNIC %d/%d/%d has no board "
 		       "configuration protocol\n", bgx->node, bgx->idx,

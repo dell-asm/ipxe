@@ -8,7 +8,7 @@ buildscript {
     ext {
         env = System.getenv()
         buildNumber = env.BUILD_NUMBER ? env.BUILD_NUMBER.toString() : ((int) (System.currentTimeMillis() / 1000)).toString()
-        BASE_REPO_URL = hasProperty('BASE_REPO_URL') ? BASE_REPO_URL          : 'http://172.20.201.85:8081/artifactory'
+        BASE_REPO_URL = hasProperty('BASE_REPO_URL') ? BASE_REPO_URL          : 'http://artifactory.asm.delllabs.net:8080/artifactory'
         PLUGINS_REPO = hasProperty('PLUGINS_REPO') ? PLUGINS_REPO             : 'plugins-release'
         PLUGINS_REPO_URL = hasProperty('PLUGINS_REPO_URL') ? PLUGINS_REPO_URL : "${BASE_REPO_URL}/${PLUGINS_REPO}"
         rpm_packageName = 'ipxe-devel'
@@ -17,10 +17,10 @@ buildscript {
                 'replacement for proprietary PXE ROMs, with many extra features such as\n' +
                 'DNS, HTTP, iSCSI, etc.'
 
-        rpm_version     = '20161114'
-        asm_version     = env.RPM_VERSION     ? env.RPM_VERSION.replaceAll('\\.', '')     : '831'
-        rpm_release     = "${asm_version}-${buildNumber}.asm.git8af888"
-        rpm_vendor      = env.RPM_VENDOR      ? env.RPM_VENDOR      : 'Dell, Inc.'
+        rpm_version     = '20190510'
+        asm_version     = env.RPM_VERSION     ? env.RPM_VERSION.replaceAll('\\.', '')     : '320'
+        rpm_release     = "${asm_version}-${buildNumber}.asm.git1cdf56"
+        rpm_vendor      = env.RPM_VENDOR      ? env.RPM_VENDOR      : 'Dell EMC, Inc.'
         rpm_url         = env.RPM_URL         ? env.RPM_URL         : 'http://ipxe.org/'
         rpm_license     = env.RPM_LICENSE     ? env.RPM_LICENSE     : 'GPLv2 with additional permissions and BSD'
         rpm_packager    = env.RPM_PACKAGER    ? env.RPM_PACKAGER    : 'vsd_buildmeisters'
